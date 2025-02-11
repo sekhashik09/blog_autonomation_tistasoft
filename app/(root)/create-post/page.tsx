@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { getPosts, createPost, deletePost } from './wordpressApis';
@@ -20,21 +20,19 @@ interface WordPressPostResponse {
 }
 
 export default function Page() {
-  const [sites, setSites] = useState([
-    // { id: 1, name: 'saamom', url: 'https://newsbyte.com.au', username: 'editor', password: '4UUa k7jm RgP34es syQc 78OT a38e' },
+  const sites = [
     { id: 2, name: 'Newsbyte', url: 'https://newsbyte.com.au', username: 'editor', password: '4UUa k7jm RgPs syQc 78OT a38e' },
-  ]);
+  ];
 
   const [selectedSite, setSelectedSite] = useState<Site>(sites[0]);
   const [posts, setPosts] = useState<WordPressPostResponse[]>([]);
   const [newPost, setNewPost] = useState({ title: '', content: '', status: 'draft', date: '' });
 
-  const fetchPosts = async () => {
-    const data = await getPosts(selectedSite);
-    setPosts(data);
-  };
-
   useEffect(() => {
+    const fetchPosts = async () => {
+      const data = await getPosts(selectedSite);
+      setPosts(data);
+    };
     fetchPosts();
   }, [selectedSite]);
 
@@ -59,9 +57,9 @@ export default function Page() {
   };
 
   return (
-    <div className='bg-white text-black p-6'>
+    <div className="bg-white text-black p-6">
       <h1 className="text-2xl font-bold mb-4">Manage Posts</h1>
-      
+
       {/* Site Selection */}
       <div className="mb-4">
         <label className="block text-gray-700">Select Site</label>
@@ -109,8 +107,9 @@ export default function Page() {
           <option value="draft">Draft</option>
           <option value="publish">Publish</option>
           <option value="future">Schedule</option>
-        </select>How to Create a Blog in WordPress
+        </select>
       </div>
+
       {newPost.status === 'future' && (
         <div className="mb-4">
           <label className="block text-gray-700">Schedule Date</label>
@@ -123,10 +122,7 @@ export default function Page() {
         </div>
       )}
 
-      <button
-        className="bg-blue-500 text-white px-4 py-2 rounded"
-        onClick={handleCreatePost}
-      >
+      <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleCreatePost}>
         Create Post
       </button>
 
@@ -143,7 +139,9 @@ export default function Page() {
                 className="bg-red-500 text-white px-4 py-2 rounded mt-2"
                 onClick={async () => {
                   const success = await deletePost(selectedSite, post.id);
-                  if (success) fetchPosts();
+                  if (success) {
+                    setPosts((prevPosts) => prevPosts.filter((p) => p.id !== post.id));
+                  }
                 }}
               >
                 Delete
