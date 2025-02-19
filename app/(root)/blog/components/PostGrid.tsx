@@ -1,0 +1,37 @@
+import Link from 'next/link';
+import { Post } from '../types';
+import ShortDateTime from './ShortDateTime';
+
+export default function PostGrid({ posts }: { posts: Post[] }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
+      {posts.map((post) => (
+        <div
+          key={post.id}
+          className="flex flex-col shadow-md rounded-xl overflow-hidden hover:scale-105 duration-300 hover:shadow-lg"
+        >
+          {post.media_url ? (
+            <img
+              src={post.media_url}
+              alt={post.title.rendered}
+              className="h-48 w-full object-cover"
+            />
+          ) : (
+            <div className="h-48 bg-gray-200" />
+          )}
+          <div className="flex flex-col justify-between flex-grow px-4 py-3">
+            <Link href={`/blog/${post.slug}`}>
+              <h3
+                className="text-lg font-semibold"
+                dangerouslySetInnerHTML={{ __html: post.title.rendered }}
+              />
+            </Link>
+            <div className="text-sm text-gray-500 mt-3">
+              <ShortDateTime datetime={post.date} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
