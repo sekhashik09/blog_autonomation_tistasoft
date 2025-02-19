@@ -1,3 +1,4 @@
+import React, { use } from 'react';
 import { notFound } from "next/navigation";
 import axios from "axios";
 import ShortDateTime from "../components/ShortDateTime";
@@ -28,8 +29,10 @@ async function fetchPost(slug: string) {
   }
 }
 
-export default async function Page({ params }: { params: { slug: string } }) {
-  const post = await fetchPost(params.slug);
+export default function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params); // ✅ Unwrap the promise!
+
+  const post = use(fetchPost(slug)); // ✅ Fetch post with the unwrapped slug
 
   if (!post) {
     return notFound(); // Show Next.js 404 page
