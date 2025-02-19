@@ -5,7 +5,16 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "sassymoms.com.au",
+        pathname: "/wp-content/uploads/**", // Allow all images under /wp-content/uploads/
+      },
+    ],
+  },
+
 };
 
 export default nextConfig;

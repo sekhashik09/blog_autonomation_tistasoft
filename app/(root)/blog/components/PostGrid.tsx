@@ -12,11 +12,14 @@ export default function PostGrid({ posts }: { posts: Post[] }) {
           className="flex flex-col shadow-md rounded-xl overflow-hidden hover:scale-105 duration-300 hover:shadow-lg"
         >
           {post.media_url ? (
-            <Image
-              src={post.media_url}
-              alt={post.title.rendered}
-              className="h-48 w-full object-cover"
-            />
+            <div className="h-48 w-full relative">
+              <Image
+                src={post.media_url}
+                alt={post.title.rendered}
+                fill
+                className="object-cover"
+              />
+            </div>
           ) : (
             <div className="h-48 bg-gray-200" />
           )}

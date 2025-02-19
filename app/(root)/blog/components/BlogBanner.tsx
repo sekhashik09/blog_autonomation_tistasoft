@@ -16,6 +16,7 @@ const BlogBanner=({ posts }: { posts: Post[] })=> {
             <Image
               src={featuredPost.media_url}
               alt={featuredPost.title.rendered}
+              fill
               className="h-full w-full object-cover"
             />
             <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-4 py-2 rounded">
