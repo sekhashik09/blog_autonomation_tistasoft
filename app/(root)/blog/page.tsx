@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Metadata } from "next";
 import BlogSearch from "./components/BlogSearch";
 import BlogBanner from "./components/BlogBanner";

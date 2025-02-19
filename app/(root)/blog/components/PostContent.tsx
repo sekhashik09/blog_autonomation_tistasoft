@@ -1,5 +1,6 @@
 import ShortDateTime from './ShortDateTime';
 import { Post } from '../types';
+import Image from 'next/image';
 
 export default function PostContent({ post }: { post: Post }) {
   return (
@@ -14,7 +15,7 @@ export default function PostContent({ post }: { post: Post }) {
       </div>
 
       {post.media_url && (
-        <img
+        <Image
           src={post.media_url}
           alt={post.title.rendered}
           className="w-full mb-6 rounded"

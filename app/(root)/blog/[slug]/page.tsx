@@ -4,8 +4,9 @@ import React, { useState, useEffect } from "react";
 // import { useRouter } from "next/navigation";
 import axios from "axios";
 import ShortDateTime from "../components/ShortDateTime";
+import Image from "next/image";
 
-const page = ({params}) => {
+const Page = ({params}) => {
     // const router = useRouter();
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -78,7 +79,7 @@ const page = ({params}) => {
 
             {/* Featured Media */}
             {post.jetpack_featured_media_url && (
-                <img
+                <Image
                     src={post.jetpack_featured_media_url}
                     alt={post.title.rendered}
                     className="w-full mb-6 rounded"
@@ -94,4 +95,4 @@ const page = ({params}) => {
     );
 };
 
-export default page;
+export default Page;

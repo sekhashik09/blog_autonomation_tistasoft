@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Post } from '../types';
 import ShortDateTime from './ShortDateTime';
+import Image from 'next/image';
 
 export default function PostGrid({ posts }: { posts: Post[] }) {
   return (
@@ -11,7 +12,7 @@ export default function PostGrid({ posts }: { posts: Post[] }) {
           className="flex flex-col shadow-md rounded-xl overflow-hidden hover:scale-105 duration-300 hover:shadow-lg"
         >
           {post.media_url ? (
-            <img
+            <Image
               src={post.media_url}
               alt={post.title.rendered}
               className="h-48 w-full object-cover"

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Post } from '../types';
+import Image from 'next/image';
 
 const BlogBanner=({ posts }: { posts: Post[] })=> {
   if (!posts.length) return null;
@@ -12,7 +13,7 @@ const BlogBanner=({ posts }: { posts: Post[] })=> {
       <div className="relative h-[70vh] rounded-lg shadow-lg overflow-hidden">
         {featuredPost.media_url && (
           <>
-            <img
+            <Image
               src={featuredPost.media_url}
               alt={featuredPost.title.rendered}
               className="h-full w-full object-cover"
