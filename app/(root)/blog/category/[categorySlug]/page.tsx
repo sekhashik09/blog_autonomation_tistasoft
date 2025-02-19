@@ -1,10 +1,16 @@
+import React, { use } from "react";
 import { Metadata } from "next";
 import CategoryContent from "../../components/CategoryContent";
 
 export const revalidate = 3600;
 
-export async function generateMetadata({ params }: { params: { categorySlug: string } }): Promise<Metadata> {
-  const data = await getCategoryData(params.categorySlug);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ categorySlug: string }>;
+}): Promise<Metadata> {
+  const { categorySlug } = await params; // ✅ Await params to unwrap it
+  const data = await getCategoryData(categorySlug);
   if (!data) return { title: "Category Not Found" };
 
   return {
@@ -45,15 +51,17 @@ async function getCategoryData(slug: string, page = 1, perPage = 10) {
   };
 }
 
-export default async function CategoryPage({
+export default function CategoryPage({
   params,
   searchParams,
 }: {
-  params: { categorySlug: string };
+  params: Promise<{ categorySlug: string }>;
   searchParams: { page?: string };
 }) {
+  const { categorySlug } = use(params); // ✅ Unwrap the promise
   const currentPage = Number(searchParams.page) || 1;
-  const data = await getCategoryData(params.categorySlug, currentPage);
+
+  const data = use(getCategoryData(categorySlug, currentPage)); // ✅ Fetch data synchronously
 
   if (!data) {
     return <div className="text-center py-10 text-red-500">Category not found</div>;
