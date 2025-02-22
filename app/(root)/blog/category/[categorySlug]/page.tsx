@@ -9,7 +9,7 @@ export async function generateMetadata({
 }: {
   params: Promise<{ categorySlug: string }>;
 }): Promise<Metadata> {
-  const { categorySlug } = await params; // ✅ Await params to unwrap it
+  const { categorySlug } = await params; // Await params to unwrap it
   const data = await getCategoryData(categorySlug);
   if (!data) return { title: "Category Not Found" };
 
@@ -21,10 +21,10 @@ export async function generateMetadata({
 
 async function getCategoryData(slug: string, page = 1, perPage = 10) {
   const blogAPI = "https://sassymoms.com.au";
-  
+
   const categoryRes = await fetch(`${blogAPI}/wp-json/wp/v2/categories?slug=${slug}`);
   const categories = await categoryRes.json();
-  
+
   if (!categories.length) return null;
 
   const postsRes = await fetch(
@@ -47,21 +47,22 @@ async function getCategoryData(slug: string, page = 1, perPage = 10) {
   return {
     category: categories[0],
     posts: postsWithMedia,
-    totalPages
+    totalPages,
   };
 }
 
-export default function CategoryPage({
-  params,
-  searchParams,
-}: {
+// Define the props type explicitly
+interface CategoryPageProps {
   params: Promise<{ categorySlug: string }>;
-  searchParams: { page?: string };
-}) {
-  const { categorySlug } = use(params); // ✅ Unwrap the promise
-  const currentPage = Number(searchParams.page) || 1;
+  searchParams: Promise<{ page?: string }>; // Align with Next.js expectations
+}
 
-  const data = use(getCategoryData(categorySlug, currentPage)); // ✅ Fetch data synchronously
+export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
+  const { categorySlug } = await params; // Unwrap the promise
+  const resolvedSearchParams = await searchParams; // Unwrap the searchParams promise
+  const currentPage = Number(resolvedSearchParams.page) || 1;
+
+  const data = await getCategoryData(categorySlug, currentPage); // Fetch data directly (no use() needed)
 
   if (!data) {
     return <div className="text-center py-10 text-red-500">Category not found</div>;

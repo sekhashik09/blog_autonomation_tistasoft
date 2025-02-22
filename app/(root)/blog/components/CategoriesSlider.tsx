@@ -10,7 +10,7 @@ export default function CategoriesSlider({ categories }: { categories: Category[
           <Link
             key={category.id}
             href={`/blog/category/${category.slug}`}
-            className="min-w-[200px] flex-shrink-0 shadow-md rounded p-4 text-center bg-gray-100 hover:scale-105 transition-transform duration-300"
+            className=" min-w-[150px] flex-shrink-0 shadow-md rounded p-4 text-center bg-gray-100 hover:scale-105 transition-transform duration-300"
             style={{
               borderColor: `hsl(${Math.random() * 360}, 70%, 70%)`,
               borderWidth: "2px",

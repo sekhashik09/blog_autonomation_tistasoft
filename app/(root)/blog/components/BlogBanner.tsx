@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Post } from '../types';
 import Image from 'next/image';
 
-const BlogBanner=({ posts }: { posts: Post[] })=> {
+const BlogBanner = ({ posts }: { posts: Post[] }) => {
   if (!posts.length) return null;
 
   const featuredPost = posts[0];
@@ -14,9 +14,10 @@ const BlogBanner=({ posts }: { posts: Post[] })=> {
         {featuredPost.media_url && (
           <>
             <Image
-              src={featuredPost.media_url}
+              src={featuredPost.media_url} // Matches the URL in the warning
               alt={featuredPost.title.rendered}
               fill
+              sizes="100vw"
               className="h-full w-full object-cover"
             />
             <div className="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-4 py-2 rounded">
@@ -36,5 +37,6 @@ const BlogBanner=({ posts }: { posts: Post[] })=> {
       </div>
     </section>
   );
-}
-export default BlogBanner
+};
+
+export default BlogBanner;
