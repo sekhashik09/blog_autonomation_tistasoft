@@ -6,7 +6,7 @@ import PostGrid from "./components/PostGrid";
 import Pagination from "./components/Pagination";
 
 export const metadata: Metadata = {
-  title: "Blog | Sassy Moms",
+  title: "Blog | Tistasoft",
   description: "Latest posts and articles from Sassy Moms",
 };
 
