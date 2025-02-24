@@ -4,7 +4,7 @@ import axios from "axios";
 import ShortDateTime from "../components/ShortDateTime";
 import Image from "next/image";
 
-const blogAPI = "https://sassymoms.com.au";
+const blogAPI = "https://bloggerscafe.com.au";
 
 async function fetchPost(slug: string) {
   try {

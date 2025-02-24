@@ -12,22 +12,50 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600; // Revalidate every hour
 
+export interface Post {
+  id: number;
+  date: string;
+  modified: string;
+  slug: string;
+  status: string;
+  type: string;
+  title: {
+    rendered: string;
+  };
+  content: {
+    rendered: string;
+  };
+  excerpt: {
+    rendered: string;
+  };
+  featured_media: number;
+  media_url?: string;
+}
+
+export interface Category {
+  id: number;
+  count: number;
+  description: string;
+  link: string;
+  name: string;
+  slug: string;
+  taxonomy: string;
+  parent: number;
+}
+
 interface BlogData {
-  latestPosts: any[];
-  categories: any[];
-  allPosts: any[];
+  latestPosts: Post[];
+  categories: Category[];
+  allPosts: Post[];
   totalPages: number;
 }
 
 async function getBlogData(page = 1, perPage = 9, search?: string): Promise<BlogData> {
-  const blogAPI = "https://sassymoms.com.au";
+  const blogAPI = "https://bloggerscafe.com.au";
   
-  // Add search parameter to posts query if search is provided
   const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
   
-  // Parallel fetch requests for better performance
   const [latestPostsRes, categoriesRes, allPostsRes] = await Promise.all([
-    // Don't apply search to latest posts banner
     fetch(`${blogAPI}/wp-json/wp/v2/posts?per_page=5`),
     fetch(`${blogAPI}/wp-json/wp/v2/categories`),
     fetch(`${blogAPI}/wp-json/wp/v2/posts?per_page=${perPage}&page=${page}${searchParam}`)
@@ -39,11 +67,9 @@ async function getBlogData(page = 1, perPage = 9, search?: string): Promise<Blog
     allPostsRes.json()
   ]);
 
-  // Get total pages from headers
   const totalPages = parseInt(allPostsRes.headers.get("x-wp-totalpages") || "1");
 
-  // Fetch media for all posts
-  const fetchMediaForPosts = async (posts: any[]) => {
+  const fetchMediaForPosts = async (posts: Post[]): Promise<Post[]> => {
     return Promise.all(
       posts.map(async (post) => {
         if (post.featured_media) {
@@ -69,7 +95,6 @@ async function getBlogData(page = 1, perPage = 9, search?: string): Promise<Blog
   };
 }
 
-// Define the props type explicitly
 interface PageProps {
   searchParams: Promise<{
     page?: string;
@@ -78,7 +103,6 @@ interface PageProps {
 }
 
 export default async function BlogPage({ searchParams }: PageProps) {
-  // Await searchParams to resolve the Promise
   const resolvedSearchParams = await searchParams;
   const currentPage = Number(resolvedSearchParams?.page) || 1;
   const searchQuery = resolvedSearchParams?.search || '';

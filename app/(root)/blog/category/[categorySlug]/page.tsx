@@ -20,7 +20,7 @@ export async function generateMetadata({
 }
 
 async function getCategoryData(slug: string, page = 1, perPage = 10) {
-  const blogAPI = "https://sassymoms.com.au";
+  const blogAPI = "https://bloggerscafe.com.au";
 
   const categoryRes = await fetch(`${blogAPI}/wp-json/wp/v2/categories?slug=${slug}`);
   const categories = await categoryRes.json();
