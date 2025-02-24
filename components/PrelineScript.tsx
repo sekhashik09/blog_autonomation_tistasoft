@@ -2,11 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import Script from "next/script";
 
-import { IStaticMethods } from "preline/preline";
 declare global {
   interface Window {
-    HSStaticMethods: IStaticMethods;
+    HSStaticMethods: {
+      autoInit: () => void;
+    };
   }
 }
 
@@ -14,14 +16,18 @@ export default function PrelineScript() {
   const path = usePathname();
 
   useEffect(() => {
-    const loadPreline = async () => {
-      await import("preline/preline");
-
+    if (window.HSStaticMethods) {
       window.HSStaticMethods.autoInit();
-    };
-
-    loadPreline();
+    }
   }, [path]);
 
-  return null;
+  return (
+    <Script
+      src="https://cdn.jsdelivr.net/npm/preline@2.0.3/dist/preline.min.js"
+      strategy="afterInteractive"
+      onLoad={() => {
+        window.HSStaticMethods?.autoInit();
+      }}
+    />
+  );
 }
