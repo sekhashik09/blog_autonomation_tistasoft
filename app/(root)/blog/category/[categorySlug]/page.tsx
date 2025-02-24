@@ -1,26 +1,11 @@
 import React from "react";
 import { Metadata } from "next";
 import CategoryContent from "../../components/CategoryContent";
+import { Category, Post } from "../../types"; // Import types from types.ts
 
-// Define types for the data structures
-interface Category {
-  id: number;
-  name: string;
-  slug: string;
-  description?: string;
-}
-
+// Define Media type (not exported, used locally)
 interface Media {
   source_url: string;
-}
-
-interface Post {
-  id: number;
-  featured_media: number;
-  title: { rendered: string };
-  content: { rendered: string };
-  [key: string]: any; // Allow additional fields from the WP API
-  media_url?: string; // Added after fetching media
 }
 
 interface CategoryData {
