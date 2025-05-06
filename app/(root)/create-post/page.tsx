@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getPosts, createPost, deletePost } from './wordpressApis';
+import { getPosts, createPost, deletePost, updatePost } from './wordpressApis';
 
 interface Site {
   id: number;
@@ -26,7 +26,8 @@ export default function Page() {
 
   const [selectedSite, setSelectedSite] = useState<Site>(sites[0]);
   const [posts, setPosts] = useState<WordPressPostResponse[]>([]);
-  const [newPost, setNewPost] = useState({ title: '', content: '', status: 'draft', date: '' });
+  const [postForm, setPostForm] = useState({ id: null as number | null, title: '', content: '', status: 'draft', date: '' });
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -36,119 +37,183 @@ export default function Page() {
     fetchPosts();
   }, [selectedSite]);
 
-  const handleCreatePost = async () => {
-    if (!newPost.title || !newPost.content) {
+  const handleSubmit = async () => {
+    if (!postForm.title || !postForm.content) {
       alert('Title and content are required');
       return;
     }
 
     const post = {
-      title: newPost.title,
-      content: newPost.content,
-      status: newPost.status,
-      date: newPost.date || new Date().toISOString(),
+      title: postForm.title,
+      content: postForm.content,
+      status: postForm.status,
+      date: postForm.date || new Date().toISOString(),
     };
 
-    const createdPost = await createPost(selectedSite, post);
-    if (createdPost) {
-      setPosts([...posts, createdPost]);
-      setNewPost({ title: '', content: '', status: 'draft', date: '' });
+    if (isEditing && postForm.id) {
+      const updatedPost = await updatePost(selectedSite, postForm.id, post);
+      if (updatedPost) {
+        setPosts(posts.map(p => p.id === postForm.id ? updatedPost : p));
+        resetForm();
+      }
+    } else {
+      const createdPost = await createPost(selectedSite, post);
+      if (createdPost) {
+        setPosts([...posts, createdPost]);
+        resetForm();
+      }
     }
   };
 
+  const handleEdit = (post: WordPressPostResponse) => {
+    const confirmEdit = window.confirm('Are you sure you want to edit this post? Any unsaved changes in the form will be replaced.');
+    if (confirmEdit) {
+      setPostForm({
+        id: post.id,
+        title: post.title.rendered,
+        content: post.content.rendered,
+        status: post.status,
+        date: post.date
+      });
+      setIsEditing(true);
+    }
+  };
+
+  const handleDelete = async (postId: number) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this post? This action cannot be undone.');
+    if (confirmDelete) {
+      const success = await deletePost(selectedSite, postId);
+      if (success) {
+        setPosts((prevPosts) => prevPosts.filter((p) => p.id !== postId));
+      }
+    }
+  };
+
+  const resetForm = () => {
+    setPostForm({ id: null, title: '', content: '', status: 'draft', date: '' });
+    setIsEditing(false);
+  };
+
   return (
-    <div className="bg-white text-black p-6">
-      <h1 className="text-2xl font-bold mb-4">Manage Posts</h1>
+    <div className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">Manage WordPress Posts</h1>
 
-      {/* Site Selection */}
-      <div className="mb-4">
-        <label className="block text-gray-700">Select Site</label>
-        <select
-          className="mt-1 block w-full p-2 border border-gray-300 rounded"
-          value={selectedSite.id}
-          onChange={(e) => {
-            const site = sites.find((s) => s.id === Number(e.target.value));
-            if (site) setSelectedSite(site);
-          }}
-        >
-          {sites.map((site) => (
-            <option key={site.id} value={site.id}>{site.name}</option>
-          ))}
-        </select>
-      </div>
-
-      {/* Post Creation */}
-      <div className="mb-4">
-        <label className="block text-gray-700">Title</label>
-        <input
-          type="text"
-          className="mt-1 block w-full p-2 border border-gray-300 rounded"
-          value={newPost.title}
-          onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-        />
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-gray-700">Content</label>
-        <textarea
-          className="mt-1 block w-full p-2 border border-gray-300 rounded"
-          value={newPost.content}
-          onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-        />
-      </div>
-
-      <div className="mb-4">
-        <label className="block text-gray-700">Status</label>
-        <select
-          className="mt-1 block w-full p-2 border border-gray-300 rounded"
-          value={newPost.status}
-          onChange={(e) => setNewPost({ ...newPost, status: e.target.value })}
-        >
-          <option value="draft">Draft</option>
-          <option value="publish">Publish</option>
-          <option value="future">Schedule</option>
-        </select>
-      </div>
-
-      {newPost.status === 'future' && (
-        <div className="mb-4">
-          <label className="block text-gray-700">Schedule Date</label>
-          <input
-            type="datetime-local"
-            className="mt-1 block w-full p-2 border border-gray-300 rounded"
-            value={newPost.date}
-            onChange={(e) => setNewPost({ ...newPost, date: e.target.value })}
-          />
+        {/* Site Selection */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <label className="block text-gray-700 font-medium mb-2">Select Site</label>
+          <select
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 transition"
+            value={selectedSite.id}
+            onChange={(e) => {
+              const site = sites.find((s) => s.id === Number(e.target.value));
+              if (site) setSelectedSite(site);
+            }}
+          >
+            {sites.map((site) => (
+              <option key={site.id} value={site.id}>{site.name}</option>
+            ))}
+          </select>
         </div>
-      )}
 
-      <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleCreatePost}>
-        Create Post
-      </button>
-
-      {/* Post List */}
-      <div className="mt-6">
-        {posts.length === 0 ? (
-          <p className="text-gray-600">No posts available.</p>
-        ) : (
-          posts.map((post) => (
-            <div key={post.id} className="bg-white p-4 rounded-lg shadow mb-4">
-              <h2 className="text-xl font-semibold">{post.title.rendered}</h2>
-              <p className="text-gray-600">{post.status}</p>
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded mt-2"
-                onClick={async () => {
-                  const success = await deletePost(selectedSite, post.id);
-                  if (success) {
-                    setPosts((prevPosts) => prevPosts.filter((p) => p.id !== post.id));
-                  }
-                }}
-              >
-                Delete
-              </button>
+        {/* Post Form */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">{isEditing ? 'Edit Post' : 'Create New Post'}</h2>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Title</label>
+              <input
+                type="text"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 transition"
+                value={postForm.title}
+                onChange={(e) => setPostForm({ ...postForm, title: e.target.value })}
+              />
             </div>
-          ))
-        )}
+
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Content</label>
+              <textarea
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 transition"
+                rows={6}
+                value={postForm.content}
+                onChange={(e) => setPostForm({ ...postForm, content: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block text-gray-700 font-medium mb-2">Status</label>
+              <select
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 transition"
+                value={postForm.status}
+                onChange={(e) => setPostForm({ ...postForm, status: e.target.value })}
+              >
+                <option value="draft">Draft</option>
+                <option value="publish">Publish</option>
+                <option value="future">Schedule</option>
+              </select>
+            </div>
+
+            {postForm.status === 'future' && (
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Schedule Date</label>
+                <input
+                  type="datetime-local"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-600 transition"
+                  value={postForm.date}
+                  onChange={(e) => setPostForm({ ...postForm, date: e.target.value })}
+                />
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition font-medium"
+                onClick={handleSubmit}
+              >
+                {isEditing ? 'Update Post' : 'Create Post'}
+              </button>
+              {isEditing && (
+                <button
+                  className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition font-medium"
+                  onClick={resetForm}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Post List */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Posts</h2>
+          {posts.length === 0 ? (
+            <p className="text-gray-600">No posts available.</p>
+          ) : (
+            <div className="space-y-4">
+              {posts.map((post) => (
+                <div key={post.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+                  <h3 className="text-lg font-semibold text-gray-800">{post.title.rendered}</h3>
+                  <p className="text-gray-600 capitalize">Status: {post.status}</p>
+                  <div className="mt-3 flex gap-3">
+                    <button
+                      className="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition font-medium"
+                      onClick={() => handleEdit(post)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition font-medium"
+                      onClick={() => handleDelete(post.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
